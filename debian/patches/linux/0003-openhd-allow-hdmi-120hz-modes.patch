@@ -1,0 +1,83 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenHD <dev@openhdfpv.org>
+Date: Mon, 25 May 2026 23:00:00 +0200
+Subject: [PATCH] openhd: allow HDMI 120Hz modes on Rockchip
+
+Some OpenHD HDMI panels expose 1080p/120 or 1200p/120 modes while also
+advertising a conservative HDMI VSDB Max TMDS Clock.  Those modes are
+inside the HDMI 1.4 340 MHz TMDS ceiling and are supported by the
+Rockchip DW-HDMI/HDMI 2.0 paths, but the Rockchip mode validation can
+reject them before the existing CRTC and PHY clock checks run.
+
+Keep the existing SoC, CRTC, and PHY validation in place, but treat
+EDID-advertised FHD/WUXGA 120 Hz-class modes as allowed up to the
+HDMI 1.4 340 MHz TMDS rate.  This mirrors the A733 OpenHD workaround
+without enabling higher-bandwidth modes such as 1440p/120 or 4K/120.
+
+Signed-off-by: OpenHD <dev@openhdfpv.org>
+---
+ src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 34 +++++++++++++++---------
+ 1 file changed, 23 insertions(+), 11 deletions(-)
+
+diff --git a/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 548e28b221c7..48dded143b88 100644
+--- a/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -1810,6 +1810,27 @@ static bool is_hdmi2_mode(const struct drm_display_mode *mode)
+ 	return false;
+ }
+ 
++static bool is_openhd_hdmi_120hz_mode(const struct drm_display_mode *mode)
++{
++	int vrefresh = drm_mode_vrefresh(mode);
++
++	return vrefresh > 60 && vrefresh <= 120 &&
++	       mode->hdisplay <= 1920 && mode->vdisplay <= 1200 &&
++	       mode->clock <= 340000;
++}
++
++static u32 dw_hdmi_rockchip_edid_max_tmds_clock(const struct drm_display_info *info,
++						const struct drm_display_mode *mode)
++{
++	u32 max_tmds_clock = info->max_tmds_clock;
++
++	if (!max_tmds_clock ||
++	    (info->is_hdmi && is_openhd_hdmi_120hz_mode(mode)))
++		max_tmds_clock = max(max_tmds_clock, 340000U);
++
++	return max_tmds_clock;
++}
++
+ static enum drm_mode_status
+ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
+ 			    const struct drm_display_info *info,
+@@ -1839,12 +1860,7 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
+ 	hdmi = to_rockchip_hdmi(encoder);
+ 
+ 	if (!hdmi->skip_check_420_mode) {
+-		u32 max_tmds_clock = connector->display_info.max_tmds_clock;
+-
+-		/* some sinks edid max_tmds_clocks are 0, we think it only support hdmi1.4 */
+-		if (!connector->display_info.max_tmds_clock)
+-			max_tmds_clock = 340000;
+-
++		u32 max_tmds_clock = dw_hdmi_rockchip_edid_max_tmds_clock(info, mode);
+ 		/* edid isn't support yuv420 and max_tmds_clock is less than mode pixel clk */
+ 		if (mode->clock < 600000 && max_tmds_clock < mode->clock &&
+ 		    (!drm_mode_is_420(&connector->display_info, mode) ||
+@@ -2468,12 +2484,7 @@ dw_hdmi_rockchip_select_output(struct drm_connector_state *conn_state,
+ 	if (*color_format == RK_IF_FORMAT_YCBCR420)
+ 		tmdsclock /= 2;
+ 
+-	/* XXX: max_tmds_clock of some sink is 0, we think it is 340MHz. */
+-	if (!max_tmds_clock)
+-		max_tmds_clock = 340000;
+-
+-	max_tmds_clock = min(max_tmds_clock, hdmi->max_tmdsclk);
+-
++	max_tmds_clock = min(dw_hdmi_rockchip_edid_max_tmds_clock(info, &mode), hdmi->max_tmdsclk);
+ 	if (hdmi->is_hdmi_qp && hdmi->link_cfg.rate_per_lane && mode.clock > 600000)
+ 		max_tmds_clock =
+ 			hdmi->link_cfg.frl_lanes * hdmi->link_cfg.rate_per_lane * 1000000;
+-- 
+2.34.1

@@ -1,0 +1,67 @@
+name: "Build Zero 3W Debs"
+
+"on":
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+    - ".github/workflows/build-zero3w-debs.yml"
+    - "Makefile"
+    - "Makefile.extra"
+    - "debian/**"
+    - "src"
+  push:
+    branches:
+    - "main"
+    - "openhd-hdmi-120hz"
+    paths:
+    - ".github/workflows/build-zero3w-debs.yml"
+    - "Makefile"
+    - "Makefile.extra"
+    - "debian/**"
+    - "src"
+
+permissions: {}
+
+jobs:
+  build-zero3w:
+    name: "Build Radxa Zero 3W kernel packages"
+    runs-on: "ubuntu-22.04"
+    timeout-minutes: 360
+    steps:
+    - name: "Checkout"
+      uses: "actions/checkout@v6"
+      with:
+        fetch-depth: 0
+        submodules: "recursive"
+
+    - name: "Set up QEMU Emulation"
+      uses: "docker/setup-qemu-action@v4"
+      with:
+        image: "tonistiigi/binfmt:latest"
+
+    - name: "Build"
+      uses: "devcontainers/ci@v0.3"
+      with:
+        push: "never"
+        runCmd: |
+          set -euo pipefail
+          make deb
+
+    - id: "artifacts_path"
+      name: "Locate generated debs"
+      run: |
+        echo "artifacts_path=$(realpath ..)" | tee -a "$GITHUB_OUTPUT"
+      shell: "bash"
+
+    - name: "Upload Zero 3W artifacts"
+      uses: "actions/upload-artifact@v7"
+      with:
+        name: "zero3w-debs"
+        if-no-files-found: "error"
+        path: |
+          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-image-*-rk2410-nocsf_*.deb
+          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-headers-*-rk2410-nocsf_*.deb
+          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-libc-dev-*-rk2410-nocsf_*.deb
+          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-image-radxa-zero3_*.deb
+          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-headers-radxa-zero3_*.deb
+          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-libc-dev-radxa-zero3_*.deb
