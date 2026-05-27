@@ -64,7 +64,7 @@ jobs:
       run: |
         set -euo pipefail
         artifacts_path="${{ steps.artifacts_path.outputs.artifacts_path }}"
-        debs_path=".zero3w-debs"
+        debs_path="zero3w-debs"
         rm -rf "${debs_path}"
         mkdir -p "${debs_path}"
 
