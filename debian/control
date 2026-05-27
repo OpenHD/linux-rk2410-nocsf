@@ -42,7 +42,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for ROCK 4D
  This is the meta-package for Linux libc-dev.
@@ -73,7 +73,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa CM4 RPI CM4 IO
  This is the meta-package for Linux libc-dev.
@@ -104,7 +104,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Generic RK3576 Image
  This is the meta-package for Linux libc-dev.
@@ -135,7 +135,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa ZERO 3
  This is the meta-package for Linux libc-dev.
@@ -166,7 +166,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for ROCK 3C
  This is the meta-package for Linux libc-dev.
@@ -197,7 +197,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa CM3I IO
  This is the meta-package for Linux libc-dev.
@@ -228,7 +228,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa E25
  This is the meta-package for Linux libc-dev.
@@ -259,7 +259,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa CM3 IO
  This is the meta-package for Linux libc-dev.
@@ -290,7 +290,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa CM3 RPI CM4 IO
  This is the meta-package for Linux libc-dev.
@@ -321,7 +321,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for Radxa CM3J RPI CM4 IO
  This is the meta-package for Linux libc-dev.
@@ -352,7 +352,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for ROCK 3A
  This is the meta-package for Linux libc-dev.
@@ -383,7 +383,7 @@ Architecture: all
 Section: kernel
 Priority: optional
 Provides: linux-libc-dev
-Depends: linux-libc-dev-${binary:Version}-rk2410-nocsf,
+Depends: linux-libc-dev (= ${binary:Version}),
          ${misc:Depends},
 Description: Radxa Linux libc-dev meta-package for ROCK 3B
  This is the meta-package for Linux libc-dev.

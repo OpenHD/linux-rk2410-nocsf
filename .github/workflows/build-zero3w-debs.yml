@@ -22,6 +22,12 @@ name: "Build Zero 3W Debs"
 
 permissions: {}
 
+env:
+  CLOUDSMITH_OWNER: "openhd"
+  CLOUDSMITH_REPO: "dev-release"
+  CLOUDSMITH_DISTRO: "debian"
+  CLOUDSMITH_RELEASE: "bookworm"
+
 jobs:
   build-zero3w:
     name: "Build Radxa Zero 3W kernel packages"
@@ -53,15 +59,54 @@ jobs:
         echo "artifacts_path=$(realpath ..)" | tee -a "$GITHUB_OUTPUT"
       shell: "bash"
 
+    - id: "zero3w_debs"
+      name: "Collect Zero 3W debs"
+      run: |
+        set -euo pipefail
+        artifacts_path="${{ steps.artifacts_path.outputs.artifacts_path }}"
+        debs_path=".zero3w-debs"
+        rm -rf "${debs_path}"
+        mkdir -p "${debs_path}"
+
+        shopt -s nullglob
+        debs=(
+          "${artifacts_path}"/linux-image-*-rk2410-nocsf_*.deb
+          "${artifacts_path}"/linux-headers-*-rk2410-nocsf_*.deb
+          "${artifacts_path}"/linux-libc-dev_*.deb
+          "${artifacts_path}"/linux-image-radxa-zero3_*.deb
+          "${artifacts_path}"/linux-headers-radxa-zero3_*.deb
+          "${artifacts_path}"/linux-libc-dev-radxa-zero3_*.deb
+        )
+
+        if [[ "${#debs[@]}" -eq 0 ]]; then
+          echo "No Zero 3W debs found in ${artifacts_path}" >&2
+          exit 1
+        fi
+
+        cp -v "${debs[@]}" "${debs_path}/"
+        ls -lh "${debs_path}"
+        echo "debs_path=${debs_path}" | tee -a "$GITHUB_OUTPUT"
+      shell: "bash"
+
     - name: "Upload Zero 3W artifacts"
       uses: "actions/upload-artifact@v7"
       with:
         name: "zero3w-debs"
         if-no-files-found: "error"
-        path: |
-          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-image-*-rk2410-nocsf_*.deb
-          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-headers-*-rk2410-nocsf_*.deb
-          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-libc-dev-*-rk2410-nocsf_*.deb
-          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-image-radxa-zero3_*.deb
-          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-headers-radxa-zero3_*.deb
-          ${{ steps.artifacts_path.outputs.artifacts_path }}/linux-libc-dev-radxa-zero3_*.deb
+        path: "${{ steps.zero3w_debs.outputs.debs_path }}/*.deb"
+
+    - name: "Install Cloudsmith CLI"
+      if: "${{ github.event_name != 'pull_request' && github.ref_name == 'openhd-hdmi-120hz' }}"
+      uses: "cloudsmith-io/cloudsmith-cli-action@v1"
+      with:
+        api-key: "${{ secrets.CLOUDSMITH_API_KEY }}"
+
+    - name: "Push Zero 3W debs to Cloudsmith"
+      if: "${{ github.event_name != 'pull_request' && github.ref_name == 'openhd-hdmi-120hz' }}"
+      run: |
+        set -euo pipefail
+        target="${CLOUDSMITH_OWNER}/${CLOUDSMITH_REPO}/${CLOUDSMITH_DISTRO}/${CLOUDSMITH_RELEASE}"
+        for deb in "${{ steps.zero3w_debs.outputs.debs_path }}"/*.deb; do
+          cloudsmith push deb "${target}" "${deb}" --republish
+        done
+      shell: "bash"
