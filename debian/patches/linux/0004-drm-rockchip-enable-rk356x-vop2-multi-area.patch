@@ -19,7 +19,6 @@ Signed-off-by: OpenHD <openhd@openhd.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi b/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi
-index 000000000000..000000000000 100644
 --- a/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi
 +++ b/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi
 @@ -1930,6 +1930,7 @@ vop: vop@fe040000 {
@@ -32,4 +31,3 @@ index 000000000000..000000000000 100644
  		vop_out: ports {
 -- 
 2.43.0
-

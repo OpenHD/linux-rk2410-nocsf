@@ -19,7 +19,6 @@ Signed-off-by: OpenHD <openhd@openhd.org>
  1 file changed, 8 insertions(+)
 
 diff --git a/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c b/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
-index 000000000000..000000000000 100644
 --- a/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
 +++ b/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
 @@ -139,6 +139,10 @@ static const uint32_t formats_for_rk356x_esmart[] = {
@@ -46,4 +45,3 @@ index 000000000000..000000000000 100644
  static const u32 formats_wb[] = {
 -- 
 2.43.0
-

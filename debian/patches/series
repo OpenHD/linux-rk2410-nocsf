@@ -1,5 +1,5 @@
 linux/0001-feat-Radxa-common-kernel-config.patch
 linux/0002-feat-Radxa-custom-kernel-config.patch
 linux/0003-openhd-allow-hdmi-120hz-modes.patch
-linux/0003-drm-rockchip-enable-rk356x-vop2-multi-area.patch
-linux/0004-drm-rockchip-expose-rk356x-16bpp-alpha-formats.patch
+linux/0004-drm-rockchip-enable-rk356x-vop2-multi-area.patch
+linux/0005-drm-rockchip-expose-rk356x-16bpp-alpha-formats.patch
