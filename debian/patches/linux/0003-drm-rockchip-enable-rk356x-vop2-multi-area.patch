@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenHD <openhd@openhd.org>
+Date: Sat, 30 May 2026 13:10:00 +0000
+Subject: [PATCH] drm/rockchip: enable RK356x VOP2 multi-area windows
+
+The RK3568 Android device tree enables support-multi-area on the VOP2
+node, but the common RK356x device tree leaves it disabled. On RK3566
+ground-station displays this limits the exposed KMS plane set to the
+primary, one Esmart cursor/overlay, and one cluster overlay.
+
+Enable the multi-area path for the normal RK356x device tree too. This
+allows the Rockchip DRM driver to expose additional VOP2 subwindows where
+the hardware and plane registration rules allow it, which gives low-latency
+KMS compositors more options for separating video, OSD, and UI surfaces.
+
+Signed-off-by: OpenHD <openhd@openhd.org>
+---
+ src/arch/arm64/boot/dts/rockchip/rk356x.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi b/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi
+index 000000000000..000000000000 100644
+--- a/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi
++++ b/src/arch/arm64/boot/dts/rockchip/rk356x.dtsi
+@@ -1930,6 +1930,7 @@ vop: vop@fe040000 {
+ 		iommus = <&vop_mmu>;
+ 		power-domains = <&power RK3568_PD_VO>;
+ 		rockchip,grf = <&grf>;
++		support-multi-area;
+ 		status = "disabled";
+ 
+ 		vop_out: ports {
+-- 
+2.43.0
+

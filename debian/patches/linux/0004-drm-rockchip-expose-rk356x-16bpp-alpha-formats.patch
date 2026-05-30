@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenHD <openhd@openhd.org>
+Date: Sat, 30 May 2026 13:15:00 +0000
+Subject: [PATCH] drm/rockchip: expose RK356x 16bpp alpha plane formats
+
+The VOP2 driver already maps ARGB1555/ABGR1555/XRGB1555/XBGR1555 through
+the RGB565 data path, enables dither-up handling for those formats, and
+marks the alpha-carrying variants as pixel-alpha capable. RK3576 Esmart
+planes already expose the same 16bpp formats.
+
+Expose the 1555 formats on RK356x Smart and Esmart planes as an opt-in
+format for bandwidth-sensitive overlays. This lets userspace choose a
+16bpp, 1-bit-alpha OSD/UI surface instead of full ARGB8888 when visual
+quality tradeoffs are acceptable.
+
+Signed-off-by: OpenHD <openhd@openhd.org>
+---
+ src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c b/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
+index 000000000000..000000000000 100644
+--- a/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
++++ b/src/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
+@@ -139,6 +139,10 @@ static const uint32_t formats_for_rk356x_esmart[] = {
+ 	DRM_FORMAT_BGR888,
+ 	DRM_FORMAT_RGB565,
+ 	DRM_FORMAT_BGR565,
++	DRM_FORMAT_ARGB1555,
++	DRM_FORMAT_ABGR1555,
++	DRM_FORMAT_XRGB1555,
++	DRM_FORMAT_XBGR1555,
+ 	DRM_FORMAT_NV12, /* yuv420_8bit linear mode, 2 plane */
+ 	DRM_FORMAT_NV16, /* yuv422_8bit linear mode, 2 plane */
+ 	DRM_FORMAT_NV24, /* yuv444_8bit linear mode, 2 plane */
+@@ -192,6 +196,10 @@ static const uint32_t formats_for_smart[] = {
+ 	DRM_FORMAT_BGR888,
+ 	DRM_FORMAT_RGB565,
+ 	DRM_FORMAT_BGR565,
++	DRM_FORMAT_ARGB1555,
++	DRM_FORMAT_ABGR1555,
++	DRM_FORMAT_XRGB1555,
++	DRM_FORMAT_XBGR1555,
+ };
+ 
+ static const u32 formats_wb[] = {
+-- 
+2.43.0
+
