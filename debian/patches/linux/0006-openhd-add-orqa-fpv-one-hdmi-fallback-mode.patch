@@ -16,12 +16,12 @@ fallback modes are used.
 
 Signed-off-by: OpenHD <dev@openhdfpv.org>
 ---
- src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c | 6 ++++++
+ src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c   | 6 ++++++
  src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c | 6 ++++++
  2 files changed, 12 insertions(+)
 
 diff --git a/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c b/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
-index 169c60893248..000000000000 100644
+index 619f089..02a2a61 100644
 --- a/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
 +++ b/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
 @@ -165,6 +165,12 @@ static const u16 csc_coeff_rgb_full_to_rgb_limited[3][4] = {
@@ -38,10 +38,11 @@ index 169c60893248..000000000000 100644
  	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1390,
  		   1430, 1650, 0, 720, 725, 730, 750, 0,
 diff --git a/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c b/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-index a08827cd6ead..000000000000 100644
+index 925df63..cf0f211 100644
 --- a/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
 +++ b/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
-@@ -526,5 +526,11 @@ EXPORT_SYMBOL(rockchip_drm_encoder_get_new_crtc);
+@@ -432,6 +432,12 @@ void rockchip_drm_te_handle(struct drm_crtc *crtc)
+ EXPORT_SYMBOL(rockchip_drm_te_handle);
  
  static const struct drm_display_mode rockchip_drm_default_modes[] = {
 +	/* ORQA FPV.One preferred DTD - 1280x960@60Hz 4:3 */
