@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenHD <dev@openhdfpv.org>
+Date: Thu, 4 Jun 2026 20:10:00 +0200
+Subject: [PATCH] openhd: add ORQA FPV.One HDMI fallback mode
+
+The ORQA FPV.One EDID advertises 1280x960@60 as the preferred base EDID
+DTD.  On RK356x/DW-HDMI systems EDID probing can intermittently fail
+during connector probing, causing the driver to expose only its internal
+fallback modes.  That fallback list currently starts with CTA 1280x720,
+so OpenHD selects 720p even though the panel's native timing is 4:3
+1280x960.
+
+Add the panel's standard 108 MHz VESA timing to the DW-HDMI and Rockchip
+fallback mode tables, and place it first so it is marked preferred when
+fallback modes are used.
+
+Signed-off-by: OpenHD <dev@openhdfpv.org>
+---
+ src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c | 6 ++++++
+ src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c | 6 ++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c b/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
+index 169c60893248..000000000000 100644
+--- a/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
++++ b/src/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
+@@ -165,6 +165,12 @@ static const u16 csc_coeff_rgb_full_to_rgb_limited[3][4] = {
+ };
+ 
+ static const struct drm_display_mode dw_hdmi_default_modes[] = {
++	/* ORQA FPV.One preferred DTD - 1280x960@60Hz 4:3 */
++	{ DRM_MODE("1280x960", DRM_MODE_TYPE_DRIVER, 108000, 1280, 1376,
++		   1488, 1800, 0, 960, 961, 964, 1000, 0,
++		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
++	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_4_3, },
++
+ 	/* 4 - 1280x720@60Hz 16:9 */
+ 	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1390,
+ 		   1430, 1650, 0, 720, 725, 730, 750, 0,
+diff --git a/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c b/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
+index a08827cd6ead..000000000000 100644
+--- a/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
++++ b/src/drivers/gpu/drm/rockchip/rockchip_drm_drv.c
+@@ -526,5 +526,11 @@ EXPORT_SYMBOL(rockchip_drm_encoder_get_new_crtc);
+ 
+ static const struct drm_display_mode rockchip_drm_default_modes[] = {
++	/* ORQA FPV.One preferred DTD - 1280x960@60Hz 4:3 */
++	{ DRM_MODE("1280x960", DRM_MODE_TYPE_DRIVER, 108000, 1280, 1376,
++		   1488, 1800, 0, 960, 961, 964, 1000, 0,
++		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC),
++	  .picture_aspect_ratio = HDMI_PICTURE_ASPECT_4_3, },
++
+ 	/* 4 - 1280x720@60Hz 16:9 */
+ 	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74250, 1280, 1390,
+ 		   1430, 1650, 0, 720, 725, 730, 750, 0,
+-- 
+2.34.1

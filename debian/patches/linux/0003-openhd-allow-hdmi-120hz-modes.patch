@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: OpenHD <dev@openhdfpv.org>
 Date: Mon, 25 May 2026 23:00:00 +0200
-Subject: [PATCH] openhd: allow HDMI 120Hz modes on Rockchip
+Subject: [PATCH] openhd: allow HDMI panel modes on Rockchip
 
 Some OpenHD HDMI panels expose 1080p/120 or 1200p/120 modes while also
 advertising a conservative HDMI VSDB Max TMDS Clock.  Those modes are
@@ -9,21 +9,27 @@ inside the HDMI 1.4 340 MHz TMDS ceiling and are supported by the
 Rockchip DW-HDMI/HDMI 2.0 paths, but the Rockchip mode validation can
 reject them before the existing CRTC and PHY clock checks run.
 
+The ORQA FPV.One panel exposes 1280x960@60 as its preferred base EDID
+DTD, but the Rockchip HDMI validation path can still drop it from the
+connector mode list and fall back to CTA 720p.  That mode is a standard
+108 MHz 4:3 VESA timing, inside the sink's EDID range limits and far
+below the HDMI 1.4 TMDS ceiling.
+
 Keep the existing SoC, CRTC, and PHY validation in place, but treat
-EDID-advertised FHD/WUXGA 120 Hz-class modes as allowed up to the
-HDMI 1.4 340 MHz TMDS rate.  This mirrors the A733 OpenHD workaround
-without enabling higher-bandwidth modes such as 1440p/120 or 4K/120.
+EDID-advertised OpenHD panel modes as allowed up to the HDMI 1.4 340 MHz
+TMDS rate.  This mirrors the A733 OpenHD workaround without enabling
+higher-bandwidth modes such as 1440p/120 or 4K/120.
 
 Signed-off-by: OpenHD <dev@openhdfpv.org>
 ---
- src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 34 +++++++++++++++---------
- 1 file changed, 23 insertions(+), 11 deletions(-)
+ src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 44 +++++++++++++++++--------
+ 1 file changed, 33 insertions(+), 11 deletions(-)
 
 diff --git a/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
 index 548e28b221c7..48dded143b88 100644
 --- a/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
 +++ b/src/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
-@@ -1810,6 +1810,27 @@ static bool is_hdmi2_mode(const struct drm_display_mode *mode)
+@@ -1810,6 +1810,42 @@ static bool is_hdmi2_mode(const struct drm_display_mode *mode)
  	return false;
  }
  
@@ -36,13 +42,28 @@ index 548e28b221c7..48dded143b88 100644
 +	       mode->clock <= 340000;
 +}
 +
++static bool is_openhd_orqa_fpv_one_mode(const struct drm_display_mode *mode)
++{
++	int vrefresh = drm_mode_vrefresh(mode);
++
++	return mode->hdisplay == 1280 && mode->vdisplay == 960 &&
++	       vrefresh >= 59 && vrefresh <= 60 &&
++	       mode->clock >= 107000 && mode->clock <= 109000;
++}
++
++static bool is_openhd_hdmi_panel_mode(const struct drm_display_mode *mode)
++{
++	return is_openhd_hdmi_120hz_mode(mode) ||
++	       is_openhd_orqa_fpv_one_mode(mode);
++}
++
 +static u32 dw_hdmi_rockchip_edid_max_tmds_clock(const struct drm_display_info *info,
 +						const struct drm_display_mode *mode)
 +{
 +	u32 max_tmds_clock = info->max_tmds_clock;
 +
 +	if (!max_tmds_clock ||
-+	    (info->is_hdmi && is_openhd_hdmi_120hz_mode(mode)))
++	    (info->is_hdmi && is_openhd_hdmi_panel_mode(mode)))
 +		max_tmds_clock = max(max_tmds_clock, 340000U);
 +
 +	return max_tmds_clock;
@@ -51,7 +72,7 @@ index 548e28b221c7..48dded143b88 100644
  static enum drm_mode_status
  dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
  			    const struct drm_display_info *info,
-@@ -1839,12 +1860,7 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
+@@ -1839,12 +1875,7 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *dw_hdmi, void *data,
  	hdmi = to_rockchip_hdmi(encoder);
  
  	if (!hdmi->skip_check_420_mode) {
@@ -65,7 +86,7 @@ index 548e28b221c7..48dded143b88 100644
  		/* edid isn't support yuv420 and max_tmds_clock is less than mode pixel clk */
  		if (mode->clock < 600000 && max_tmds_clock < mode->clock &&
  		    (!drm_mode_is_420(&connector->display_info, mode) ||
-@@ -2468,12 +2484,7 @@ dw_hdmi_rockchip_select_output(struct drm_connector_state *conn_state,
+@@ -2468,12 +2499,7 @@ dw_hdmi_rockchip_select_output(struct drm_connector_state *conn_state,
  	if (*color_format == RK_IF_FORMAT_YCBCR420)
  		tmdsclock /= 2;
  
